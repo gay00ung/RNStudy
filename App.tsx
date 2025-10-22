@@ -1,12 +1,13 @@
 import { StatusBar } from 'expo-status-bar';
 import React, { useState } from 'react';
-import { StyleSheet, Text, View, Image, TouchableOpacity } from 'react-native';
+import { StyleSheet, Text, View, Image, TouchableOpacity, TextInput } from 'react-native';
 
 export default function App() {
-  // 1. 상태
+  // 상태
   const [jobTitle, setJobTitle] = useState('Android Developer');
+  const [name, setName] = useState('gay00ung');
 
-  // 2. 버튼 클릭 시 실행 될 함수
+  // 버튼 클릭 시 실행 될 함수
   const handlePress = () => {
     if (jobTitle == 'Android Developer') {
       setJobTitle('iOS Developer'); // setJobTitle 함수를 호출하면 상태가 변경되고, UI가 자동으로 다시 그려짐
@@ -20,11 +21,21 @@ export default function App() {
       <View style={styles.card}>
         <Image style={styles.profileImage} source={require('./assets/icon.png')} />
 
-        <Text style={styles.name}>gay00ung</Text>
-        {/* 3. 상태를 UI에 반영 */}
+        <Text style={styles.name}>{name}</Text>
+
+        {/* 상태를 UI에 반영 */}
         <Text style={styles.jobTitle}>{jobTitle}</Text>
 
-        {/* 4. 상호작용 컴포넌트 추가 */}
+        {/* 사용자 입력을 위한 TextInput 컴포넌트 추가 */}
+        {/* Compose의 TextField(value = name, onValueChange = { name = it }) 와 동일 */}
+        <TextInput
+          style={styles.input}
+          placeholder="Enter your name"
+          value={name}
+          onChangeText={setName}
+        />
+
+        {/* 상호작용 컴포넌트 추가 */}
         <TouchableOpacity style={styles.button} onPress={handlePress}>
           <Text style={styles.buttonText}>Toggle Job</Text>
         </TouchableOpacity>
@@ -51,6 +62,7 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.1,
     shadowRadius: 8,
     elevation: 5,
+    width: '80%'
   },
   profileImage: {
     width: 100,
@@ -81,4 +93,14 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: 'bold',
   },
+  input: {
+    width: '100%',
+    height: 40,
+    borderColor: 'gray',
+    borderWidth: 1,
+    borderRadius: 8,
+    paddingHorizontal: 8,
+    marginTop: 20,
+    fontSize: 16,
+  }
 });
