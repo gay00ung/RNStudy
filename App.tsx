@@ -18,11 +18,13 @@ const SKILLS = [
   { id: '10', title: 'Firebase' },
 ];
 
+// Skill 인터페이스 정의
 interface Skill {
   id: string;
   title: string;
 }
 
+// ProfileCardProps 인터페이스 정의
 interface ProfileCardProps {
   name: string;
   setName: (name: string) => void;
@@ -30,7 +32,8 @@ interface ProfileCardProps {
   handlePress: () => void;
 }
 
-const renderProfileCard = (name: string, setName: (name: string) => void, jobTitle: string, handlePress: () => void): JSX.Element => (
+// ProfileCard 컴포넌트 분리
+const ProfileCard = ({ name, setName, jobTitle, handlePress }: ProfileCardProps) => (
   <View style={styles.card}>
     <Image style={styles.profileImage} source={require('./assets/icon.png')} />
 
@@ -82,7 +85,13 @@ export default function App() {
         // ListHeaderComponent에 프로필 카드와 스킬 목록 헤더를 함께 렌더링
         ListHeaderComponent={
           <>
-            {renderProfileCard(name, setName, jobTitle, handlePress)}
+            {/* 분리된 ProfileCard 컴포넌트를 호출하고, props를 통해 상태와 함수를 전달 */}
+            <ProfileCard
+              name={name}
+              setName={setName}
+              jobTitle={jobTitle}
+              handlePress={handlePress}
+            />
             <Text style={styles.listHeader}>Skills</Text>
           </>
         }
