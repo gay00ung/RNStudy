@@ -1,5 +1,5 @@
 import { StatusBar } from 'expo-status-bar';
-import React, { useState } from 'react';
+import React, { JSX, useState } from 'react';
 import { StyleSheet, Text, View, Image, TextInput, TouchableOpacity, FlatList } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
@@ -13,7 +13,47 @@ const SKILLS = [
   { id: '5', title: 'Expo' },
   { id: '6', title: 'Android (Kotlin/Compose)' },
   { id: '7', title: 'Git & GitHub' },
+  { id: '8', title: 'UI/UX Design' },
+  { id: '9', title: 'REST APIs' },
+  { id: '10', title: 'Firebase' },
 ];
+
+interface Skill {
+  id: string;
+  title: string;
+}
+
+interface ProfileCardProps {
+  name: string;
+  setName: (name: string) => void;
+  jobTitle: string;
+  handlePress: () => void;
+}
+
+const renderProfileCard = (name: string, setName: (name: string) => void, jobTitle: string, handlePress: () => void): JSX.Element => (
+  <View style={styles.card}>
+    <Image style={styles.profileImage} source={require('./assets/icon.png')} />
+
+    <Text style={styles.name}>{name}</Text>
+
+    {/* 상태를 UI에 반영 */}
+    <Text style={styles.jobTitle}>{jobTitle}</Text>
+
+    {/* 사용자 입력을 위한 TextInput 컴포넌트 추가 */}
+    {/* Compose의 TextField(value = name, onValueChange = { name = it }) 와 동일 */}
+    <TextInput
+      style={styles.input}
+      placeholder="Enter your name"
+      value={name}
+      onChangeText={setName}
+    />
+
+    {/* 상호작용 컴포넌트 추가 */}
+    <TouchableOpacity style={styles.button} onPress={handlePress}>
+      <Text style={styles.buttonText}>Toggle Job</Text>
+    </TouchableOpacity>
+  </View>
+);
 
 export default function App() {
   // 상태
@@ -31,45 +71,25 @@ export default function App() {
 
   return (
     <SafeAreaView style={styles.container}>
-      <View style={styles.container}>
-        <View style={styles.card}>
-          <Image style={styles.profileImage} source={require('./assets/icon.png')} />
+      <FlatList
+        data={SKILLS}
+        renderItem={({ item }) => (
+          <View style={styles.skillItem}>
+            <Text style={styles.skillText}>{item.title}</Text>
+          </View>
+        )}
+        keyExtractor={item => item.id}
+        // ListHeaderComponent에 프로필 카드와 스킬 목록 헤더를 함께 렌더링
+        ListHeaderComponent={
+          <>
+            {renderProfileCard(name, setName, jobTitle, handlePress)}
+            <Text style={styles.listHeader}>Skills</Text>
+          </>
+        }
 
-          <Text style={styles.name}>{name}</Text>
-
-          {/* 상태를 UI에 반영 */}
-          <Text style={styles.jobTitle}>{jobTitle}</Text>
-
-          {/* 사용자 입력을 위한 TextInput 컴포넌트 추가 */}
-          {/* Compose의 TextField(value = name, onValueChange = { name = it }) 와 동일 */}
-          <TextInput
-            style={styles.input}
-            placeholder="Enter your name"
-            value={name}
-            onChangeText={setName}
-          />
-
-          {/* 상호작용 컴포넌트 추가 */}
-          <TouchableOpacity style={styles.button} onPress={handlePress}>
-            <Text style={styles.buttonText}>Toggle Job</Text>
-          </TouchableOpacity>
-        </View>
-
-        {/* FlatList 컴포넌트로 리스트 렌더링 */}
-        <FlatList
-          style={styles.listContainer}
-          data={SKILLS}
-          renderItem={({ item }) => (
-            <View style={styles.skillItem}>
-              <Text style={styles.skillText}>{item.title}</Text>
-            </View>
-          )}
-          keyExtractor={item => item.id}
-          ListHeaderComponent={<Text style={styles.listHeader}>Skills</Text>}
-        />
-
-        <StatusBar style="auto" />
-      </View>
+        contentContainerStyle={styles.listContentContainer}
+      />
+      <StatusBar style="auto" />
     </SafeAreaView>
   );
 }
@@ -158,5 +178,9 @@ const styles = StyleSheet.create({
   skillText: {
     fontSize: 16,
     color: '#334155',
+  },
+  listContentContainer: {
+    paddingHorizontal: 20,
+    paddingBottom: 40,
   },
 });
