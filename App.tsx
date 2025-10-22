@@ -1,13 +1,34 @@
 import { StatusBar } from 'expo-status-bar';
-import { StyleSheet, Text, View, Image } from 'react-native';
+import React, { useState } from 'react';
+import { StyleSheet, Text, View, Image, TouchableOpacity } from 'react-native';
 
 export default function App() {
+  // 1. 상태
+  const [jobTitle, setJobTitle] = useState('Android Developer');
+
+  // 2. 버튼 클릭 시 실행 될 함수
+  const handlePress = () => {
+    if (jobTitle == 'Android Developer') {
+      setJobTitle('iOS Developer'); // setJobTitle 함수를 호출하면 상태가 변경되고, UI가 자동으로 다시 그려짐
+    } else {
+      setJobTitle('Android Developer');
+    }
+  }
+
   return (
     <View style={styles.container}>
       <View style={styles.card}>
         <Image style={styles.profileImage} source={require('./assets/icon.png')} />
+
         <Text style={styles.name}>gay00ung</Text>
-        <Text style={styles.jobTitle}>Android Developer</Text>
+        {/* 3. 상태를 UI에 반영 */}
+        <Text style={styles.jobTitle}>{jobTitle}</Text>
+
+        {/* 4. 상호작용 컴포넌트 추가 */}
+        <TouchableOpacity style={styles.button} onPress={handlePress}>
+          <Text style={styles.buttonText}>Toggle Job</Text>
+        </TouchableOpacity>
+
       </View>
       <StatusBar style="auto" />
     </View>
@@ -46,5 +67,18 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: '#64748b',
     marginTop: 4,
+  },
+  button: {
+    marginTop: 20,
+    backgroundColor: '#3b82f6',
+    paddingVertical: 12,
+    paddingHorizontal: 24,
+    borderRadius: 8,
+    elevation: 2,
+  },
+  buttonText: {
+    color: 'white',
+    fontSize: 16,
+    fontWeight: 'bold',
   },
 });
