@@ -1,6 +1,19 @@
 import { StatusBar } from 'expo-status-bar';
 import React, { useState } from 'react';
-import { StyleSheet, Text, View, Image, TouchableOpacity, TextInput } from 'react-native';
+import { StyleSheet, Text, View, Image, TextInput, TouchableOpacity, FlatList } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
+
+// 리스트에 표시할 데이터 
+// LazyColumn의 items(skills) { ... } 와 동일
+const SKILLS = [
+  { id: '1', title: 'React Native' },
+  { id: '2', title: 'TypeScript' },
+  { id: '3', title: 'JavaScript' },
+  { id: '4', title: 'Node.js' },
+  { id: '5', title: 'Expo' },
+  { id: '6', title: 'Android (Kotlin/Compose)' },
+  { id: '7', title: 'Git & GitHub' },
+];
 
 export default function App() {
   // 상태
@@ -17,32 +30,47 @@ export default function App() {
   }
 
   return (
-    <View style={styles.container}>
-      <View style={styles.card}>
-        <Image style={styles.profileImage} source={require('./assets/icon.png')} />
+    <SafeAreaView style={styles.container}>
+      <View style={styles.container}>
+        <View style={styles.card}>
+          <Image style={styles.profileImage} source={require('./assets/icon.png')} />
 
-        <Text style={styles.name}>{name}</Text>
+          <Text style={styles.name}>{name}</Text>
 
-        {/* 상태를 UI에 반영 */}
-        <Text style={styles.jobTitle}>{jobTitle}</Text>
+          {/* 상태를 UI에 반영 */}
+          <Text style={styles.jobTitle}>{jobTitle}</Text>
 
-        {/* 사용자 입력을 위한 TextInput 컴포넌트 추가 */}
-        {/* Compose의 TextField(value = name, onValueChange = { name = it }) 와 동일 */}
-        <TextInput
-          style={styles.input}
-          placeholder="Enter your name"
-          value={name}
-          onChangeText={setName}
+          {/* 사용자 입력을 위한 TextInput 컴포넌트 추가 */}
+          {/* Compose의 TextField(value = name, onValueChange = { name = it }) 와 동일 */}
+          <TextInput
+            style={styles.input}
+            placeholder="Enter your name"
+            value={name}
+            onChangeText={setName}
+          />
+
+          {/* 상호작용 컴포넌트 추가 */}
+          <TouchableOpacity style={styles.button} onPress={handlePress}>
+            <Text style={styles.buttonText}>Toggle Job</Text>
+          </TouchableOpacity>
+        </View>
+
+        {/* FlatList 컴포넌트로 리스트 렌더링 */}
+        <FlatList
+          style={styles.listContainer}
+          data={SKILLS}
+          renderItem={({ item }) => (
+            <View style={styles.skillItem}>
+              <Text style={styles.skillText}>{item.title}</Text>
+            </View>
+          )}
+          keyExtractor={item => item.id}
+          ListHeaderComponent={<Text style={styles.listHeader}>Skills</Text>}
         />
 
-        {/* 상호작용 컴포넌트 추가 */}
-        <TouchableOpacity style={styles.button} onPress={handlePress}>
-          <Text style={styles.buttonText}>Toggle Job</Text>
-        </TouchableOpacity>
-
+        <StatusBar style="auto" />
       </View>
-      <StatusBar style="auto" />
-    </View>
+    </SafeAreaView>
   );
 }
 
@@ -50,8 +78,8 @@ const styles = StyleSheet.create({
   container: {
     flex: 1, // 화면 전체를 차지 (Modifier.fillMaxSize()와 유사)
     backgroundColor: '#f0f4f8',
-    alignItems: 'center', // 가로축 중앙 정렬 (horizontalAlignment = Alignment.CenterHorizontally)
-    justifyContent: 'center', // 세로축 중앙 정렬 (verticalArrangement = Arrangement.Center)
+    // alignItems: 'center', // 가로축 중앙 정렬 (horizontalAlignment = Alignment.CenterHorizontally)
+    // justifyContent: 'center', // 세로축 중앙 정렬 (verticalArrangement = Arrangement.Center)
   },
   card: {
     backgroundColor: 'white',
@@ -62,7 +90,8 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.1,
     shadowRadius: 8,
     elevation: 5,
-    width: '80%'
+    marginHorizontal: 20,
+    marginTop: 40,
   },
   profileImage: {
     width: 100,
@@ -102,5 +131,32 @@ const styles = StyleSheet.create({
     paddingHorizontal: 8,
     marginTop: 20,
     fontSize: 16,
-  }
+  },
+  listContainer: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    marginBottom: 12,
+    color: '#1e293b',
+  },
+  listHeader: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    marginBottom: 12,
+    color: '#1e293b',
+  },
+  skillItem: {
+    backgroundColor: 'white',
+    padding: 12,
+    borderRadius: 8,
+    marginBottom: 8,
+    shadowColor: '#000',
+    elevation: 2,
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    shadowOffset: { width: 0, height: 2 },
+  },
+  skillText: {
+    fontSize: 16,
+    color: '#334155',
+  },
 });
