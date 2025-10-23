@@ -4,6 +4,8 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import ProfileCard from '../components/ProfileCard';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { RootStackParamList, Skill } from '../navigation/types';
+import { useUserStore } from '../store/useUserStore';
+
 type HomeScreenNavigationProp = StackNavigationProp<RootStackParamList, 'Home'>;
 
 type Props = {
@@ -32,8 +34,8 @@ const fetchSkillsFromAPI = (): Promise<Skill[]> => {
 }
 
 export default function HomeScreen({ navigation }: Props) {
-    const [jobTitle, setJobTitle] = useState('Android Developer');
-    const [name, setName] = useState('gay00ung');
+    // Zustand 스토어에서 사용자 이름과 직업 타이틀, 상태 변경 함수를 가져옴
+    const { name, setName, jobTitle, toggleJobTitle } = useUserStore();
 
     // 데이터를 위한 3가지 상태 정의
     const [skills, setSkills] = useState<Skill[]>([]);
@@ -60,13 +62,6 @@ export default function HomeScreen({ navigation }: Props) {
 
         loadData(); // 정의한 비동기 함수 실행
     }, []); // 빈 의존성 배열: 컴포넌트 마운트 시 한 번만 실행
-
-    // 프로필 카드의 "직업 변경" 버튼 클릭시 실행 될 함수
-    const handlePress = () => {
-        setJobTitle(prevTitle =>
-            prevTitle === 'Android Developer' ? 'iOS Developer' : 'Mobile Developer'
-        );
-    }
 
     // 스킬 아이템 클릭시 실행 될 함수
     const onSkillPress = (skill: Skill) => {
@@ -103,11 +98,12 @@ export default function HomeScreen({ navigation }: Props) {
                 ListHeaderComponent={
                     <>
                         {/* import한 ProfileCard 컴포넌트를 호출하고, props를 통해 상태와 함수를 전달 */}
+                        {/* Zustand 스토어에서 가져온 name, setName, jobTitle, toggleJobTitle을 props로 전달 */}
                         <ProfileCard
                             name={name}
                             setName={setName}
                             jobTitle={jobTitle}
-                            handlePress={handlePress}
+                            handlePress={toggleJobTitle}
                         />
                         <Text style={styles.listHeader}>Skills</Text>
                     </>
