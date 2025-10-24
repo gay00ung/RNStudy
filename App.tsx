@@ -7,6 +7,7 @@ import { RootStackParamList, RootTabParamList } from './navigation/types';
 import HomeScreen from './screens/HomeScreen';
 import SkillDetailScreen from './screens/SkillDetailScreen';
 import SettingsScreen from './screens/SettingsScreen';
+import { Ionicons } from '@expo/vector-icons';
 
 // Stack 및 Tab 네비게이터 생성
 const Stack = createStackNavigator<RootStackParamList>();
@@ -48,12 +49,27 @@ export default function App() {
     <NavigationContainer>
       <StatusBar style="auto" />
       <Tab.Navigator
-        // 탭 네비게이터의 전반적인 옵션 설정
-        screenOptions={{
+        // ({ route }) 파라미터를 받아, 현재 라우트(화면)에 따라 다른 옵션을 설정
+        screenOptions={({ route }) => ({
+          // 탭 아이콘을 설정하는 부분 (Compose의 NavigationBarItem의 icon = { ... }과 동일)
+          tabBarIcon: ({ focused, color, size }) => {
+            let iconName: React.ComponentProps<typeof Ionicons>['name']; // 아이콘 이름 타입 추론
+
+            if (route.name === 'HomeStack') {
+              // focused 상태에 따라 다른 아이콘 사용
+              iconName = focused ? 'home' : 'home-outline';
+            } else if (route.name === 'Settings') {
+              iconName = focused ? 'settings' : 'settings-outline';
+            } else {
+              iconName = 'help-outline'; // 기본 아이콘
+            }
+            // Ionicons 컴포넌트를 반환하여 아이콘 렌더링
+            // color와 size는 React Navigation에서 자동으로 전달
+            return <Ionicons name={iconName} size={size} color={color} />;
+          },
           tabBarActiveTintColor: '#667eea',
-          tabBarInactiveTintColor: '#94a3b8',
-        }}
-      >
+          tabBarInactiveTintColor: 'gray',
+        })}>
         {/* '홈' 탭에 중첩된 스택 네비게이터 연결 */}
         <Tab.Screen
           name="HomeStack"

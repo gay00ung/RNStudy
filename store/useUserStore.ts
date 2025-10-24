@@ -14,6 +14,7 @@ type UserState = {
 // create 함수에 상태와 함수를 정의하는 콜백 함수를 전달
 // set: 상태를 업데이트하는 함수 (ViewModel의 _state.value = ...와 유사)
 export const useUserStore = create(
+    // persist 미들웨어를 사용하여 상태를 AsyncStorage에 영구 저장
     persist<UserState>(
         (set) => ({
             // 초기 상태 값 설정
