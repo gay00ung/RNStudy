@@ -1,13 +1,41 @@
 import React from 'react';
-import { View, Text, StyleSheet, TextInput, Button } from 'react-native';
+import { View, Text, StyleSheet, TextInput, Button, Alert } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useUserStore } from '../store/useUserStore';
 import { SettingsScreenProps } from '../navigation/types';
+import Toast from 'react-native-toast-message';
 
 export default function SettingsScreen({ navigation }: SettingsScreenProps) {
     // Zustand 스토어에서 사용자 이름과 상태 변경 함수를 가져옴
-    const { name, setName } = useUserStore();
-    const logout = useUserStore((state) => state.logout);
+    const { name, setName, logout } = useUserStore();
+
+    const handleLogout = () => {
+        Alert.alert(
+            '로그아웃',
+            '정말 로그아웃 하시겠습니까?',
+            [
+                {
+                    text: '취소',
+                    style: 'cancel',
+                    onPress: () => console.log('Logout cancelled')
+                },
+                {
+                    text: '확인',
+                    style: 'destructive',
+                    onPress: () => {
+                        logout();
+                        Toast.show({
+                            type: 'success',
+                            text1: '로그아웃 되었습니다.',
+                            position: 'bottom',
+                            visibilityTime: 2000,
+                        })
+                        console.log('User logged out');
+                    }
+                },
+            ]
+        )
+    }
 
     return (
         <SafeAreaView style={styles.container}>
@@ -26,7 +54,8 @@ export default function SettingsScreen({ navigation }: SettingsScreenProps) {
                     <View style={styles.divider} />
                     <Button
                         title="로그아웃"
-                        onPress={() => logout()}
+                        color="#ff3d00"
+                        onPress={handleLogout}
                     />
                 </View>
             </View>

@@ -10,6 +10,7 @@ import HomeScreen from './screens/HomeScreen';
 import SkillDetailScreen from './screens/SkillDetailScreen';
 import SettingsScreen from './screens/SettingsScreen';
 import LoginScreen from './screens/LoginScreen';
+import { Toast } from 'react-native-toast-message/lib/src/Toast';
 
 // Stack 및 Tab 네비게이터 생성
 // 각 네비게이터 스택을 생성하고 타입 지정
@@ -117,6 +118,9 @@ export default function App() {
       <StatusBar style={authToken ? 'light' : 'dark'} />
       {/* 인증 토큰이 있으면 홈 탭 네비게이터, 없으면 인증 네비게이터 표시 */}
       {authToken ? <HomeTabNavigator /> : <AuthNavigator />}
+
+      {/* Toast 메시지 표시를 위한 컴포넌트 */}
+      <Toast />
     </NavigationContainer>
   );
 }
