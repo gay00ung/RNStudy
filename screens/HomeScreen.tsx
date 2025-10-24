@@ -5,6 +5,7 @@ import ProfileCard from '../components/ProfileCard';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { RootStackParamList, Skill } from '../navigation/types';
 import { useUserStore } from '../store/useUserStore';
+import apiService from '../api/apiService';
 
 type HomeScreenNavigationProp = StackNavigationProp<RootStackParamList, 'Home'>;
 
@@ -12,6 +13,7 @@ type Props = {
     navigation: HomeScreenNavigationProp;
 }
 
+// 모의 API 호출 함수 (실제 API 호출은 apiService에서 처리) -> 더 이상 사용하지 않음
 const fetchSkillsFromAPI = (): Promise<Skill[]> => {
     const FACE_SKILLS_DATA: Skill[] = [
         { id: '1', title: 'React Native' },
@@ -50,7 +52,8 @@ export default function HomeScreen({ navigation }: Props) {
                 setLoading(true); // 로딩 시작
                 setError(null); // 에러 초기화
 
-                const data = await fetchSkillsFromAPI(); // API 호출
+                // 실제 API 호출
+                const data = await apiService.fetchSkills(); // API 호출
                 setSkills(data); // 데이터 상태 업데이트
             } catch (error) {
                 setError('Failed to load skills'); // 에러 상태 업데이트
