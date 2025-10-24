@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { StyleSheet, Text, View, FlatList, TouchableOpacity, Alert, ActivityIndicator } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import ProfileCard from '../components/ProfileCard';
@@ -41,30 +41,40 @@ export default function HomeScreen({ navigation }: Props) {
 
     // 데이터를 위한 3가지 상태 정의
     const [skills, setSkills] = useState<Skill[]>([]);
-    const [loading, setLoading] = useState<boolean>(true);
     const [error, setError] = useState<string | null>(null);
 
-    // useEffect 훅: 컴포넌트가 처음 마운트될 때 API 데이터를 가져옴
+    // 초기 로딩 및 당겨서 새로고침 상태
+    const [initialLoading, setInitialLoading] = useState(true);
+    const [isRefreshing, setIsRefreshing] = useState(false);
+
+    // useCallback: 이 함수가 불필요하게 재생성되는 것을 방지 (Compose의 remember { ... } 와 유사)
+    const loadData = useCallback(async () => {
+        setError(null);
+        try {
+            const data = await apiService.fetchSkills();
+            setSkills(data);
+        } catch (e) {
+            setError('데이터를 불러오는 데 실패했습니다.');
+        }
+    }, []); // 빈 의존성 배열 -> 앱 실행 내내 재사용
+
+    // 초기 로딩 (useEffect)
     // Compose의 LaunchedEffect와 유사
     useEffect(() => {
-        const loadData = async () => {
-            try {
-                setLoading(true); // 로딩 시작
-                setError(null); // 에러 초기화
+        async function loadInitialData() {
+            setInitialLoading(true);
+            await loadData();
+            setInitialLoading(false);
+        }
+        loadInitialData();
+    }, [loadData]); // loadData 함수가 (이론상) 변경될 때만 실행 (지금은 한 번만 실행됨)
 
-                // 실제 API 호출
-                const data = await apiService.fetchSkills(); // API 호출
-                setSkills(data); // 데이터 상태 업데이트
-            } catch (error) {
-                setError('Failed to load skills'); // 에러 상태 업데이트
-                Alert.alert('Error', '스킬 목록을 불러오는 데 실패했습니다.'); // 사용자에게 알림
-            } finally {
-                setLoading(false); // 로딩 종료
-            }
-        };
-
-        loadData(); // 정의한 비동기 함수 실행
-    }, []); // 빈 의존성 배열: 컴포넌트 마운트 시 한 번만 실행
+    // 당겨서 새로고침 (onRefresh)
+    const handleRefresh = useCallback(async () => {
+        setIsRefreshing(true); // 새로고침 스피너 시작
+        await loadData();
+        setIsRefreshing(false); // 새로고침 스피너 종료
+    }, [loadData]); // loadData 함수가 변경될 때만 재생성
 
     // 스킬 아이템 클릭시 실행 될 함수
     const onSkillPress = (skill: Skill) => {
@@ -74,9 +84,9 @@ export default function HomeScreen({ navigation }: Props) {
 
     // 로딩 중일 때 로딩 인디케이터 표시
     const renderListContent = () => {
-        if (loading) {
-            // Compose의 CircularProgressIndicator와 유사
-            return <ActivityIndicator size="large" color="#0000ff" style={styles.loader} />;
+        // 초기 로딩 중일 때 전체 화면 로더 표시
+        if (initialLoading) {
+            return <ActivityIndicator size="large" color="#667eea" style={styles.loader} />;
         }
 
         // 에러가 있을 때 에러 메시지 표시
@@ -113,6 +123,9 @@ export default function HomeScreen({ navigation }: Props) {
                 }
 
                 contentContainerStyle={styles.listContentContainer}
+                // Swipe to Refresh 기능 추가
+                refreshing={isRefreshing} // 새로고침 스피너를 보여줄지 여부
+                onRefresh={handleRefresh} // 새로고침 시 실행할 함수
             />
         );
     };
