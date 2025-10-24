@@ -33,6 +33,28 @@ const apiService = {
             // 에러 발생시 호출한 쪽(HomeScreen)에서 처리할 수 있도록 예외 던지기
             throw new Error('Failed to fetch skills');
         }
+    },
+
+    /**
+     * (신규 추가) 가짜 로그인 API
+     * (Kotlin 매핑)
+     * suspend fun login(user: String, pass: String): AuthToken
+    */
+    login: async (username: string, password: string): Promise<string> => {
+        console.log('Logging in with', username, password);
+        // 1초 지연 후 가짜 토큰 반환
+        return new Promise((resolve, reject) => {
+            setTimeout(() => {
+                if (username === 'root' && password === '1234') {
+                    console.log('Login successful');
+                    resolve('mock-auth-token-123456'); // 모의 토큰 반환
+                } else {
+                    console.log('Login failed');
+                    // 로그인 실패 시 예외 발생
+                    reject(new Error('아이디 또는 비밀번호가 올바르지 않습니다.'));
+                }
+            }, 1000);
+        });
     }
 };
 

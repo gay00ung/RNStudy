@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, StyleSheet, TextInput } from 'react-native';
+import { View, Text, StyleSheet, TextInput, Button } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useUserStore } from '../store/useUserStore';
 import { SettingsScreenProps } from '../navigation/types';
@@ -7,6 +7,7 @@ import { SettingsScreenProps } from '../navigation/types';
 export default function SettingsScreen({ navigation }: SettingsScreenProps) {
     // Zustand 스토어에서 사용자 이름과 상태 변경 함수를 가져옴
     const { name, setName } = useUserStore();
+    const logout = useUserStore((state) => state.logout);
 
     return (
         <SafeAreaView style={styles.container}>
@@ -19,6 +20,15 @@ export default function SettingsScreen({ navigation }: SettingsScreenProps) {
                     onChangeText={setName} /// 스토어의 setName 함수를 바로 연결
                     placeholder="이름을 입력하세요"
                 />
+
+                {/* 로그아웃 버튼 */}
+                <View style={styles.loginSection}>
+                    <View style={styles.divider} />
+                    <Button
+                        title="로그아웃"
+                        onPress={() => logout()}
+                    />
+                </View>
             </View>
         </SafeAreaView>
     );
@@ -53,5 +63,13 @@ const styles = StyleSheet.create({
         borderRadius: 8,
         paddingHorizontal: 12,
         fontSize: 16,
+    },
+    loginSection: {
+        marginTop: 50,
+    },
+    divider: {
+        height: 1,
+        backgroundColor: '#cbd5e1',
+        marginBottom: 20,
     },
 });
