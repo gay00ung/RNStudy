@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { StatusBar } from 'expo-status-bar';
 import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
@@ -11,6 +11,11 @@ import SkillDetailScreen from './screens/SkillDetailScreen';
 import SettingsScreen from './screens/SettingsScreen';
 import LoginScreen from './screens/LoginScreen';
 import { Toast } from 'react-native-toast-message/lib/src/Toast';
+import * as SplashScreen from 'expo-splash-screen';
+
+// Zustand가 로드 되었는지 추적하는 상태
+// SplashScreen이 자동으로 사라지지 않도록 설정
+SplashScreen.preventAutoHideAsync();
 
 // Stack 및 Tab 네비게이터 생성
 // 각 네비게이터 스택을 생성하고 타입 지정
@@ -109,10 +114,51 @@ function AuthNavigator() {
 
 // 메인 앱 컴포넌트 (라우터)
 export default function App() {
+  // Zustand 로딩 완료 상태인지 추적하는 로컬 상태
+  const [appIsReady, setAppIsReady] = useState(false);
+
   // Zustand 스토어에서 인증 토큰 상태 구독
   // (Kotlin/Compose 매핑: viewModel.authToken.collectAsState())
   const authToken = useUserStore((state) => state.authToken);
 
+  // Zustand 의 persist 미들웨어가 AsyncStorage로부터
+  // 데이터 로딩(rehydration)을 완료했는지 확인
+  useEffect(() => { // Compose의 LaunchedEffect와 유사
+    async function prepareApp() {
+      try {
+        // Zustand 스토어의 persist가 로드 완료 되었는지 확인
+        // persist 미들웨어의 hasHydrated()와 onFinishHydration() 사용가능
+        if (useUserStore.persist.hasHydrated()) {
+          // Zustand 스토어가 이미 Hydrate(복원)된 경우
+          setAppIsReady(true);
+        } else {
+          // Zustand 스토어가 아직 Hydrate되지 않은 경우, 완료될 때까지 대기 (리스너 등록)
+          const unsub = useUserStore.persist.onFinishHydration(() => {
+            setAppIsReady(true); // 로드 완료 되면 상태 변경
+            unsub(); // 완료 후 구독 해제
+          });
+        }
+      } catch (e) {
+        console.warn(e);
+      }
+    }
+
+    prepareApp();
+  }, []); // 앱 마운트 시 한 번 실행
+
+  // 앱 준비가 완료되면 SplashScreen 숨기기
+  useEffect(() => {
+    if (appIsReady) {
+      SplashScreen.hideAsync();
+    }
+  }, [appIsReady]); // appIsReady가 변경될 때마다 실행
+
+  // 앱이 준비되지 않았으면 아무것도 렌더링하지 않음
+  if (!appIsReady) {
+    return null;
+  }
+
+  // 앱이 준비 되었으면 네비게이터 렌더링
   return (
     <NavigationContainer>
       <StatusBar style={authToken ? 'light' : 'dark'} />
