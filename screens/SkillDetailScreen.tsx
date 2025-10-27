@@ -10,11 +10,6 @@ import apiService from '../api/apiService';
 type SkillDetailScreenNavigationProp = StackNavigationProp<RootStackParamList, 'SkillDetail'>;
 type SkillDetailScreenRouteProp = RouteProp<RootStackParamList, 'SkillDetail'>;
 
-type Props = {
-    navigation: SkillDetailScreenNavigationProp;
-    route: SkillDetailScreenRouteProp;
-};
-
 export default function SkillDetailScreen({ route, navigation }: SkillDetailScreenProps) {
     const { skill: baseSkill } = route.params; // route.params에서 skill 객체 추출
 

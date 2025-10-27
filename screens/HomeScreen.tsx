@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useCallback } from 'react';
-import { StyleSheet, Text, View, FlatList, TouchableOpacity, Alert, ActivityIndicator } from 'react-native';
+import { StyleSheet, Text, View, FlatList, TouchableOpacity, Alert, ActivityIndicator, Pressable, Modal } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import ProfileCard from '../components/ProfileCard';
 import { StackNavigationProp } from '@react-navigation/stack';
@@ -11,29 +11,7 @@ type HomeScreenNavigationProp = StackNavigationProp<RootStackParamList, 'Home'>;
 
 type Props = {
     navigation: HomeScreenNavigationProp;
-}
-
-// 모의 API 호출 함수 (실제 API 호출은 apiService에서 처리) -> 더 이상 사용하지 않음
-const fetchSkillsFromAPI = (): Promise<Skill[]> => {
-    const FACE_SKILLS_DATA: Skill[] = [
-        { id: '1', title: 'React Native' },
-        { id: '2', title: 'TypeScript' },
-        { id: '3', title: 'JavaScript (ES6+)' },
-        { id: '4', title: 'Node.js' },
-        { id: '5', title: 'Expo' },
-        { id: '6', title: 'Android (Kotlin/Compose)' },
-        { id: '7', title: 'Git & GitHub' },
-        { id: '8', title: 'UI/UX Design' },
-        { id: '9', title: 'REST APIs' },
-        { id: '10', title: 'Firebase' },
-    ];
-
-    return new Promise(resolve => {
-        setTimeout(() => {
-            resolve(FACE_SKILLS_DATA);
-        }, 2000); // 2초 지연 후 데이터 반환
-    });
-}
+};
 
 export default function HomeScreen({ navigation }: Props) {
     // Zustand 스토어에서 사용자 이름과 직업 타이틀, 상태 변경 함수를 가져옴
@@ -46,6 +24,11 @@ export default function HomeScreen({ navigation }: Props) {
     // 초기 로딩 및 당겨서 새로고침 상태
     const [initialLoading, setInitialLoading] = useState(true);
     const [isRefreshing, setIsRefreshing] = useState(false);
+
+    // 모달 상태를 위한 useState 추가
+    // Compose의 val (showDialog, setShowDialog) = remember { mutableStateOf(false) } 와 유사
+    const [modalVisible, setModalVisible] = useState(false);
+    const [selectedSkill, setSelectedSkill] = useState<Skill | null>(null);
 
     // useCallback: 이 함수가 불필요하게 재생성되는 것을 방지 (Compose의 remember { ... } 와 유사)
     const loadData = useCallback(async () => {
@@ -78,8 +61,18 @@ export default function HomeScreen({ navigation }: Props) {
 
     // 스킬 아이템 클릭시 실행 될 함수
     const onSkillPress = (skill: Skill) => {
-        // navigation.navigate를 사용하여 SkillDetail 스크린으로 이동하면서 skill 파라미터 전달
-        navigation.navigate('SkillDetail', { skill: skill });
+        // 바로 이동하는 대신, 선택된 스킬을 상태에 저장하고 모달 열기
+        setSelectedSkill(skill);
+        setModalVisible(true);
+    }
+
+    // 모달 내부의 '상세보기' 버튼 클릭 핸들러
+    const handleViewDetails = () => {
+        if (selectedSkill) {
+            navigation.navigate('SkillDetail', { skill: selectedSkill });
+        }
+        setModalVisible(false); // 모달 닫기
+        setSelectedSkill(null); // 선택된 스킬 초기화
     }
 
     // 로딩 중일 때 로딩 인디케이터 표시
@@ -133,6 +126,53 @@ export default function HomeScreen({ navigation }: Props) {
     return (
         <SafeAreaView style={styles.container}>
             {renderListContent()}
+
+            {/* 모달 컴포넌트 렌더링 */}
+            <Modal
+                animationType="fade" // 모달 애니메이션 타입 'slide', 'fade', 'none' 중 선택
+                transparent={true} // 모달 배경을 투명하게 설정
+                visible={modalVisible} // modalVisible 상태에 따라 보임/숨김
+                onRequestClose={() => { // 안드로이드 뒤로가기 버튼 핸들러
+                    setModalVisible(!modalVisible);
+                    setSelectedSkill(null);
+                }}
+            >
+                {/* 모달 UI 구성 */}
+                <Pressable
+                    style={styles.modalOverlay} // 반투명 검은색 배경
+                    onPress={() => { // 배경 클릭 시 모달 닫기
+                        setModalVisible(false);
+                        setSelectedSkill(null);
+                    }}
+                >
+                    <Pressable
+                        style={styles.modalContent}
+                        onPress={() => { }} // 모달 컨텐츠 클릭 시 닫히지 않도록 이벤트 전파 방지
+                    >
+                        <Text style={styles.modalTitle}>알림</Text>
+                        <Text style={styles.modalMessage}>
+                            '{selectedSkill?.title}' 스킬의 상세 정보를 보시겠습니까?
+                        </Text>
+                        <View style={styles.modalButtonContainer}>
+                            <TouchableOpacity
+                                style={[styles.modalButton, styles.cancelButton]}
+                                onPress={() => {
+                                    setModalVisible(false);
+                                    setSelectedSkill(null);
+                                }}
+                            >
+                                <Text style={styles.buttonText}>취소</Text>
+                            </TouchableOpacity>
+                            <TouchableOpacity
+                                style={[styles.modalButton, styles.confirmButton]}
+                                onPress={handleViewDetails}
+                            >
+                                <Text style={styles.buttonText}>상세보기</Text>
+                            </TouchableOpacity>
+                        </View>
+                    </Pressable>
+                </Pressable>
+            </Modal>
         </SafeAreaView>
     );
 }
@@ -174,5 +214,59 @@ const styles = StyleSheet.create({
         fontSize: 16,
         color: 'red',
         textAlign: 'center',
-    }
+    },
+
+    // --- (모달 스타일 추가) ---
+    modalOverlay: {
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+        backgroundColor: 'rgba(0, 0, 0, 0.5)', // 반투명 배경
+    },
+    modalContent: {
+        width: '80%',
+        backgroundColor: 'white',
+        borderRadius: 16,
+        padding: 24,
+        alignItems: 'center',
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.25,
+        shadowRadius: 4,
+        elevation: 5,
+    },
+    modalTitle: {
+        fontSize: 20,
+        fontWeight: 'bold',
+        marginBottom: 12,
+    },
+    modalMessage: {
+        fontSize: 16,
+        textAlign: 'center',
+        marginBottom: 24,
+        lineHeight: 22,
+    },
+    modalButtonContainer: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        width: '100%',
+    },
+    modalButton: {
+        flex: 1,
+        paddingVertical: 12,
+        borderRadius: 8,
+        alignItems: 'center',
+        marginHorizontal: 8,
+    },
+    cancelButton: {
+        backgroundColor: '#9ca3af', // 회색
+    },
+    confirmButton: {
+        backgroundColor: '#667eea', // 메인 컬러
+    },
+    buttonText: {
+        color: 'white',
+        fontSize: 16,
+        fontWeight: 'bold',
+    },
 });
