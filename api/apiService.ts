@@ -1,6 +1,6 @@
 import axios from 'axios';
 // navigation/types.ts에서 Skill 타입을 가져옴
-import { Skill } from '../navigation/types';
+import { Skill, SkillDetail } from '../navigation/types';
 
 // API의 기본 URL (Retrofit의 BaseUrl과 동일)
 const API_URL = 'https://jsonplaceholder.typicode.com';
@@ -32,6 +32,30 @@ const apiService = {
             console.error('Error fetching skills from API:', error);
             // 에러 발생시 호출한 쪽(HomeScreen)에서 처리할 수 있도록 예외 던지기
             throw new Error('Failed to fetch skills');
+        }
+    },
+
+    /**
+     * ID로 스킬 상세 정보 가져오기
+     * (Kotlin 매핑)
+     * suspend fun getSkillDetail(id: String): SkillDetail
+     */
+    fetchSkillDetail: async (id: string): Promise<SkillDetail> => {
+        try {
+            const response = await axios.get(`${API_URL}/todos/${id}`);
+            const data = response.data;
+
+            // API 응답을 SkillDetail 타입으로 매핑
+            const skillDetail: SkillDetail = {
+                id: data.id.toString(),
+                title: data.title,
+                completed: data.completed,
+                description: `이 작업은 ID ${data.id}에 대한 상세 설명입니다. API 응답에는 없지만 예시를 위해 추가되었습니다.`
+            };
+            return skillDetail;
+        } catch (error) {
+      console.error(`API Error fetching skill detail for id ${id}: `, error);
+      throw new Error('Failed to fetch skill detail');
         }
     },
 
