@@ -35,6 +35,16 @@ export type AuthStackParamList = {
 };
 
 // --- 개별 스크린 Props 정의 ---
+// Props는 부모 컴포넌트에서 자식 컴포넌트로 전달되는 데이터
+// Compose
+// @Composable
+// fun ChildComponent(name: String, age: Int) {
+//     Text(text = "$name 님, $age 세")
+// }
+
+// 사용
+// ChildComponent(name = "홍길동", age = 25)
+
 // 각 스크린이 받을 Props 타입을 미리 정의 
 export type HomeScreenProps = StackScreenProps<RootStackParamList, 'Home'>;
 export type SkillDetailScreenProps = StackScreenProps<RootStackParamList, 'SkillDetail'>;

@@ -6,6 +6,8 @@ import { Skill, SkillDetail } from '../navigation/types';
 const API_URL = 'https://jsonplaceholder.typicode.com';
 
 // API 호출을 담당하는 객체 (Retrofit의 @Service 구현체와 유사)
+// Promise: 비동기 작업의 완료 또는 실패를 나타내는 객체 (Pending, Fulfilled, Rejected 상태 가짐)
+// async/await: 비동기 코드를 동기 코드처럼 작성할 수 있게 해주는 문법
 const apiService = {
     /**
      * (Kotlin 매핑)
@@ -15,7 +17,7 @@ const apiService = {
         try {
             // GET /todos?_limit=20 (20개만 가져오기)
             // Ktor: client.get<List<TodoDto>>("...")
-            const response = await axios.get(`${API_URL}/todos`, {
+            const response = await axios.get(`${API_URL}/todos`, { // await: promise가 완료될 때까지 기다림
                 params: {
                     _limit: 20, // 최대 20개의 항목만 가져오기
                 },

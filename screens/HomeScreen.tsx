@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useCallback } from 'react';
-import { StyleSheet, Text, View, FlatList, TouchableOpacity, Alert, ActivityIndicator, Pressable, Modal } from 'react-native';
+import { StyleSheet, Text, View, FlatList, TouchableOpacity, Alert, ActivityIndicator, Pressable, Modal, Platform } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import ProfileCard from '../components/ProfileCard';
 import { StackNavigationProp } from '@react-navigation/stack';
@@ -112,6 +112,10 @@ export default function HomeScreen({ navigation }: Props) {
                             handlePress={toggleJobTitle}
                         />
                         <Text style={styles.listHeader}>Skills</Text>
+                        {/* Platform.OS를 이용해 현재 플랫폼 이름을 랜더링 */}
+                        <Text style={styles.platformText}>
+                            (Running on: {Platform.OS.toUpperCase()})
+                        </Text>
                     </>
                 }
 
@@ -197,10 +201,18 @@ const styles = StyleSheet.create({
         padding: 16,
         borderRadius: 8,
         marginBottom: 10,
-        elevation: 2,
-        shadowColor: '#000',
-        shadowOpacity: 0.05,
-        shadowRadius: 4,
+        // Platform.select을 이용해 플랫폼별 스타일 분기
+        ...Platform.select({
+            ios: {
+                shadowColor: '#000',
+                shadowOpacity: 0.1,
+                shadowRadius: 5,
+                shadowOffset: { width: 0, height: 2 },
+            },
+            android: {
+                elevation: 3,
+            },
+        })
     },
     skillText: {
         fontSize: 16,
@@ -268,5 +280,11 @@ const styles = StyleSheet.create({
         color: 'white',
         fontSize: 16,
         fontWeight: 'bold',
+    },
+    platformText: {
+        fontSize: 12,
+        color: '#9ca3af',
+        textAlign: 'center',
+        marginBottom: 16,
     },
 });

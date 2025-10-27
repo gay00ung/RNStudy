@@ -7,6 +7,9 @@ import { SkillDetailScreenProps, SkillDetail } from '../navigation/types';
 import apiService from '../api/apiService';
 
 // SkillDetailScreen이 받게 될 route와 navigation prop의 타입 정의
+// React Navigation이 자동으로 전달하는 props:
+// - route: 화면 정보와 파라미터
+// - navigation: 화면 이동 메서드들
 type SkillDetailScreenNavigationProp = StackNavigationProp<RootStackParamList, 'SkillDetail'>;
 type SkillDetailScreenRouteProp = RouteProp<RootStackParamList, 'SkillDetail'>;
 
