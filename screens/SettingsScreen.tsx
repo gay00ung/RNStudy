@@ -1,9 +1,12 @@
 import React from 'react';
-import { View, Text, StyleSheet, TextInput, Button, Alert } from 'react-native';
+import { View, Text, StyleSheet, TextInput, Button, Alert, NativeModules, Platform } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useUserStore } from '../store/useUserStore';
 import { SettingsScreenProps } from '../navigation/types';
 import Toast from 'react-native-toast-message';
+
+// NativeModules에서 ToastModule 가져오기 (Android 전용)
+const { AndroidToast } = NativeModules;
 
 export default function SettingsScreen({ navigation }: SettingsScreenProps) {
     // Zustand 스토어에서 사용자 이름과 상태 변경 함수를 가져옴
@@ -37,6 +40,17 @@ export default function SettingsScreen({ navigation }: SettingsScreenProps) {
         )
     }
 
+    // 네이티브 토스트 메시지 호출 함수
+    const handleNativeToast = () => {
+        // Android일 경우에만 네이티브 모듈 호출
+        if (Platform.OS === 'android' && AndroidToast) {
+            AndroidToast.show("Hello from Kotlin! 👋");
+        } else {
+            // iOS일 경우 (지금은 AndroidToast 모듈이 없으므로) JS Alert 띄우기
+            Alert.alert("알림", "이 기능은 Android에서만 동작합니다.");
+        }
+    }
+
     return (
         <SafeAreaView style={styles.container}>
             <View style={styles.content}>
@@ -56,6 +70,15 @@ export default function SettingsScreen({ navigation }: SettingsScreenProps) {
                         title="로그아웃"
                         color="#ff3d00"
                         onPress={handleLogout}
+                    />
+                </View>
+
+                {/* 네이티브 토스트 메시지 버튼 */}
+                <View style={styles.logoutButtonContainer}>
+                    <Button
+                        title="네이티브 토스트 띄우기 (Android)"
+                        color="#007aff"
+                        onPress={handleNativeToast}
                     />
                 </View>
             </View>
@@ -100,5 +123,8 @@ const styles = StyleSheet.create({
         height: 1,
         backgroundColor: '#cbd5e1',
         marginBottom: 20,
+    },
+    logoutButtonContainer: {
+        marginTop: 16,
     },
 });
