@@ -6,6 +6,7 @@ import { StackNavigationProp } from '@react-navigation/stack';
 import { RootStackParamList, Skill } from '../navigation/types';
 import { useUserStore } from '../store/useUserStore';
 import apiService from '../api/apiService';
+import Animated, { FadeIn, SlideInDown } from 'react-native-reanimated';
 
 type HomeScreenNavigationProp = StackNavigationProp<RootStackParamList, 'Home'>;
 
@@ -91,13 +92,19 @@ export default function HomeScreen({ navigation }: Props) {
         return (
             <FlatList
                 data={skills}
-                renderItem={({ item }) => (
-                    // 각 스킬 아이템을 TouchableOpacity로 감싸 클릭 가능하게 만듦
-                    <TouchableOpacity onPress={() => onSkillPress(item)}>
-                        <View style={styles.skillItem}>
-                            <Text style={styles.skillText}>{item.title}</Text>
-                        </View>
-                    </TouchableOpacity>
+                // renderItem에서 index를 사용하기 위해 구조 분해 할당
+                renderItem={({ item, index }) => (
+                    // TouchableOpacity를 Animated.View로 감싸 애니메이션 효과 추가
+                    <Animated.View
+                        entering={SlideInDown.delay(index * 50).duration(400)}
+                    >
+                        {/* 각 스킬 아이템을 TouchableOpacity로 감싸 클릭 가능하게 만듦 */}
+                        <TouchableOpacity onPress={() => onSkillPress(item)}>
+                            <View style={styles.skillItem}>
+                                <Text style={styles.skillText}>{item.title}</Text>
+                            </View>
+                        </TouchableOpacity>
+                    </Animated.View>
                 )}
                 keyExtractor={item => item.id}
                 // ListHeaderComponent에 프로필 카드와 스킬 목록 헤더를 함께 렌더링

@@ -19,7 +19,7 @@ const apiService = {
             // Ktor: client.get<List<TodoDto>>("...")
             const response = await axios.get(`${API_URL}/todos`, { // await: promise가 완료될 때까지 기다림
                 params: {
-                    _limit: 20, // 최대 20개의 항목만 가져오기
+                    _limit: 100, // 최대 100개의 항목만 가져오기
                 },
             });
 
