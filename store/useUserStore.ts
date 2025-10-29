@@ -7,10 +7,12 @@ type UserState = {
     name: string;
     jobTitle: string;
     authToken: String | null; // 인증 토큰 상태 추가 (초기 값: null)
+    profileImageUri?: string | null;
     setName: (newName: string) => void;
     toggleJobTitle: () => void;
     login: (token: string) => void; // 로그인 함수 추가 (토큰 저장)
     logout: () => void; // 로그아웃 함수 추가 (토큰 제거)
+    setProfileImageUri: (uri: string | null) => void;
 };
 
 // Zustand를 사용하여 사용자 정보 스토어 생성
@@ -24,6 +26,7 @@ export const useUserStore = create(
             name: 'gay00ung',
             jobTitle: 'Android Developer',
             authToken: null, // 초기 인증 토큰 값은 null
+            profileImageUri: null,
 
             // 상태를 변경하는 함수 (ViewModel의 public fun setName(...) {...}와 유사)
             // 이 함수들이 호출 될 때 마다 자동으로 AsyncStorage에 상태가 저장됨
@@ -38,7 +41,10 @@ export const useUserStore = create(
             login: (token) => set({ authToken: token }),
 
             // 로그아웃 함수: 토큰을 null로 설정하여 제거
-            logout: () => set({ authToken: null }),
+            logout: () => set({ authToken: null, profileImageUri: null }),
+
+            // 프로필 이미지 URI 설정 함수
+            setProfileImageUri: (uri) => set({ profileImageUri: uri }),
         }),
         {
             // persist 옵션 설정
