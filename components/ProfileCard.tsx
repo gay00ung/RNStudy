@@ -1,7 +1,8 @@
 import React from 'react';
-import { StyleSheet, Text, View, Image, TouchableOpacity, TextInput, Alert, Platform } from 'react-native';
+import { Alert, Platform } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
 import { useUserStore } from '../store/useUserStore';
+import styled from 'styled-components/native';
 
 // Props에 대한 타입 인터페이스
 interface ProfileCardProps {
@@ -10,6 +11,77 @@ interface ProfileCardProps {
     jobTitle: string;
     handlePress: () => void;
 }
+
+// 스타일 컴포넌트 정의 (StyleSheet.create 대신)
+// styled.View`...` : View 컴포넌트에 스타일을 적용한 새 컴포넌트를 만듦
+// CSS 문법을 백틱(` `` `) 안에 직접 작성
+const StyledCardView = styled.View`
+  background-color: white;
+  border-radius: 16px; /* CSS 스타일: px 단위 사용 가능 */
+  padding: 24px;
+  align-items: center;
+  /* Platform.select 로직은 styled-components 내부에서도 사용 가능 */
+  ${Platform.select({
+    ios: `
+      shadow-color: #000;
+      shadow-opacity: 0.1;
+      shadow-radius: 8px;
+      shadow-offset: 0px 2px;
+    `,
+    android: `
+      elevation: 5;
+    `,
+})}
+  margin-bottom: 24px; /* HomeScreen과의 간격 */
+`;
+
+// styled(Image)`...` : 기존 Image 컴포넌트에 스타일 적용
+const StyledProfileImage = styled.Image`
+  width: 100px;
+  height: 100px;
+  border-radius: 50px; /* 원형 이미지 */
+  margin-bottom: 16px;
+`;
+
+// styled(TouchableOpacity)`...` : TouchableOpacity에 스타일 적용
+const StyledImageTouchable = styled.TouchableOpacity``; // 이미지 감싸는 용도 (스타일 없음)
+
+const StyledNameText = styled.Text`
+  font-size: 24px;
+  font-weight: bold;
+  color: #1e293b;
+`;
+
+const StyledJobTitleText = styled.Text`
+  font-size: 16px;
+  color: #64748b;
+  margin-top: 4px;
+`;
+
+const StyledTextInput = styled.TextInput`
+  width: 100%;
+  height: 40px;
+  border-color: #cbd5e1;
+  border-width: 1px;
+  border-radius: 8px;
+  padding-horizontal: 10px;
+  margin-top: 20px;
+  font-size: 16px;
+`;
+
+const StyledButton = styled.TouchableOpacity`
+  margin-top: 20px;
+  background-color: #667eea;
+  padding: 12px 24px; /* 여러 값 지정 가능 */
+  border-radius: 8px;
+  elevation: 2; /* Android 그림자 */
+`;
+
+const StyledButtonText = styled.Text`
+  color: white;
+  font-size: 16px;
+  font-weight: bold;
+`;
 
 // ProfileCard 컴포넌트 본문
 const ProfileCard = ({ name, setName, jobTitle, handlePress }: ProfileCardProps) => {
@@ -75,51 +147,30 @@ const ProfileCard = ({ name, setName, jobTitle, handlePress }: ProfileCardProps)
         );
     };
 
+    // JSX에서 기존 컴포넌트 대신 styled 컴포넌트를 사용
     return (
-        <View style={styles.card}>
-            <TouchableOpacity onPress={handleImagePress}>
-                <Image
-                    style={styles.profileImage}
-                    // 이미지가 components 폴더 밖에 있으므로 경로를 '../'로 수정
+        <StyledCardView>
+            <StyledImageTouchable onPress={handleImagePress}>
+                <StyledProfileImage
                     source={profileImageUri ? { uri: profileImageUri } : require('../assets/icon.png')}
                 />
-            </TouchableOpacity>
-            <Text style={styles.name}>{name}</Text>
-            <Text style={styles.jobTitle}>{jobTitle}</Text>
-            <TextInput
-                style={styles.input}
+            </StyledImageTouchable>
+
+            <StyledNameText>{name}</StyledNameText>
+            <StyledJobTitleText>{jobTitle}</StyledJobTitleText>
+
+            <StyledTextInput
                 placeholder="이름을 입력하세요"
                 value={name}
                 onChangeText={setName}
             />
-            <TouchableOpacity style={styles.button} onPress={handlePress}>
-                <Text style={styles.buttonText}>직업 변경</Text>
-            </TouchableOpacity>
-        </View>
+
+            <StyledButton onPress={handlePress}>
+                <StyledButtonText>직업 변경</StyledButtonText>
+            </StyledButton>
+        </StyledCardView>
     );
 };
-
-// 이 컴포넌트에서만 사용하는 스타일
-const styles = StyleSheet.create({
-    card: {
-        backgroundColor: 'white',
-        borderRadius: 16,
-        padding: 24,
-        alignItems: 'center',
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.1,
-        shadowRadius: 8,
-        elevation: 5,
-        marginBottom: 24,
-    },
-    profileImage: { width: 100, height: 100, borderRadius: 50, marginBottom: 16 },
-    name: { fontSize: 24, fontWeight: 'bold', color: '#1e293b' },
-    jobTitle: { fontSize: 16, color: '#64748b', marginTop: 4 },
-    button: { marginTop: 20, backgroundColor: '#667eea', paddingVertical: 12, paddingHorizontal: 24, borderRadius: 8, elevation: 2 },
-    buttonText: { color: 'white', fontSize: 16, fontWeight: 'bold' },
-    input: { width: '100%', height: 40, borderColor: '#cbd5e1', borderWidth: 1, borderRadius: 8, paddingHorizontal: 10, marginTop: 20, fontSize: 16 },
-});
 
 // 다른 파일에서 이 컴포넌트를 import 할 수 있도록 export 
 export default ProfileCard;
