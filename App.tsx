@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { StatusBar } from 'expo-status-bar';
-import { NavigationContainer } from '@react-navigation/native';
+import { NavigationContainer, NavigationContainerRef } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { Ionicons } from '@expo/vector-icons';
@@ -115,6 +115,18 @@ function AuthNavigator() {
   );
 }
 
+// 알림 수신 시 기본 동작 설정 (앱이 켜져 있을 때)
+// (Kotlin 매핑: FirebaseMessagingService.onMessageReceived)
+Notifications.setNotificationHandler({
+  handleNotification: async () => ({
+    shouldShowAlert: true, // 앱이 켜져있어도 알림 배너를 띄움
+    shouldPlaySound: false,
+    shouldSetBadge: false,
+    shouldShowBanner: true,
+    shouldShowList: true,
+  }),
+});
+
 // 푸시 알림 권한 요청 및 토큰 발급 함수
 // (Kotlin/Compose 매핑: FCM SDK 초기화 및 토큰 요청 로직과 동일)
 async function registerForPushNotificationsAsync() {
@@ -174,6 +186,10 @@ export default function App() {
   // (Kotlin/Compose 매핑: viewModel.authToken.collectAsState())
   const authToken = useUserStore((state) => state.authToken);
 
+  // 네비게이션 컨테이너를 직접 제어하기 위한 Ref 생성
+  // (Kotlin 매핑: Activity에서 NavController 인스턴스를 들고 있는 것과 유사)
+  const navigationRef = useRef<NavigationContainerRef<RootTabParamList>>(null);
+
   // Zustand 의 persist 미들웨어가 AsyncStorage로부터
   // 데이터 로딩(rehydration)을 완료했는지 확인
   useEffect(() => { // Compose의 LaunchedEffect와 유사
@@ -201,7 +217,44 @@ export default function App() {
     }
 
     prepareApp();
-  }, []); // 앱 마운트 시 한 번 실행
+
+    // 알림 "탭" 리스너 등록
+    // (Kotlin 매핑: PendingIntent를 받아서 intent.extras를 처리하는 로직)
+    const notificationResponseListener = Notifications.addNotificationResponseReceivedListener(response => {
+      console.log('Notification Response Received:', response);
+
+      // 알림에 숨겨진 data를 꺼냄
+      const data = response.notification.request.content.data;
+
+      if (data && data.skillId && data.skillTitle && 
+          typeof data.skillId === 'string' && typeof data.skillTitle === 'string') {
+        // 앱이 완전히 로드 된 후에만 (navigationRef.isReady()) 네비게이션 수행
+        if (navigationRef.current) {
+          // SkillDetail 화면으로 네비게이션
+          navigationRef.current.navigate('HomeStack', { // 먼저 'HomeStack' 탭으로 이동
+            screen: 'SkillDetail', // 그 안의 'SkillDetail' 스크린으로 이동
+            params: { // 파라미터 전달
+              skill: {
+                id: data.skillId,
+                title: data.skillTitle,
+              },
+            },
+          });
+        }
+      }
+    });
+
+    // 포그라운드 알림 수신 리스너 등록
+    const notificationReceivedListener = Notifications.addNotificationReceivedListener(notification => {
+      console.log('Notification Received in foreground:', notification);
+    });
+
+    // 컴포넌트가 사라질 때 리스너 정리 (메모리 누수 방지)
+    return () => {
+      notificationReceivedListener.remove();
+      notificationResponseListener.remove();
+    };
+  }, []); // 마운트 시 한 번만 실행
 
   // 앱 준비가 완료되면 SplashScreen 숨기기
   useEffect(() => {
@@ -217,7 +270,8 @@ export default function App() {
 
   // 앱이 준비 되었으면 네비게이터 렌더링
   return (
-    <NavigationContainer>
+    // NavigationContainer에 ref를 연결
+    <NavigationContainer ref={navigationRef}>
       <StatusBar style={authToken ? 'light' : 'dark'} />
       {/* 인증 토큰이 있으면 홈 탭 네비게이터, 없으면 인증 네비게이터 표시 */}
       {authToken ? <HomeTabNavigator /> : <AuthNavigator />}
