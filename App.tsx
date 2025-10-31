@@ -12,6 +12,9 @@ import SettingsScreen from './screens/SettingsScreen';
 import LoginScreen from './screens/LoginScreen';
 import { Toast } from 'react-native-toast-message/lib/src/Toast';
 import * as SplashScreen from 'expo-splash-screen';
+import * as Notifications from 'expo-notifications';
+import * as Device from 'expo-device';
+import { Platform } from 'react-native';
 
 // Zustand가 로드 되었는지 추적하는 상태
 // SplashScreen이 자동으로 사라지지 않도록 설정
@@ -112,6 +115,56 @@ function AuthNavigator() {
   );
 }
 
+// 푸시 알림 권한 요청 및 토큰 발급 함수
+// (Kotlin/Compose 매핑: FCM SDK 초기화 및 토큰 요청 로직과 동일)
+async function registerForPushNotificationsAsync() {
+  let token;
+
+  // 디바이스인지 확인 (시뮬레이터에서는 푸시 알림 불가)
+  if (Device.isDevice) {
+    // 권한 상태 확인
+    const { status: existingStatus } = await Notifications.getPermissionsAsync();
+    let finalStatus = existingStatus
+
+    // 권한이 없으면 요청
+    if (existingStatus !== 'granted') {
+      const { status } = await Notifications.requestPermissionsAsync();
+      finalStatus = status;
+    }
+
+    // 권한 거부시 함수 종료
+    if (finalStatus !== 'granted') {
+      alert('푸시 알림 권한이 거부되었습니다!');
+      return;
+    }
+
+    // Expo 푸시 토큰 발급
+    // (Kotlin/Compose 매핑: FirebaseMessaging.getInstance().token 과 동일)
+    try {
+      const expoPushToken = await Notifications.getExpoPushTokenAsync({
+        projectId: 'd9f06e2f-07c0-476f-a6b0-5dbf2dbc76c8' // Expo 프로젝트 ID
+      });
+      token = expoPushToken.data;
+      console.log('Expo Push Token:', token);
+    } catch (error) {
+      console.error('Error getting Expo push token:', error);
+    }
+  } else {
+    alert('푸시 알림은 실제 디바이스에서만 작동합니다!');
+  }
+
+  // 안드로이드 알림 채널 설정
+  if (Platform.OS == 'android') {
+    Notifications.setNotificationChannelAsync('default', {
+      name: 'default',
+      importance: Notifications.AndroidImportance.MAX,
+      vibrationPattern: [0, 250, 250, 250],
+      lightColor: '#FF231F7C',
+    });
+  }
+  return token;
+}
+
 // 메인 앱 컴포넌트 (라우터)
 export default function App() {
   // Zustand 로딩 완료 상태인지 추적하는 로컬 상태
@@ -138,8 +191,12 @@ export default function App() {
             unsub(); // 완료 후 구독 해제
           });
         }
+
+        // 푸시 알림 권한 요청 및 토큰 발급
+        registerForPushNotificationsAsync();
       } catch (e) {
         console.warn(e);
+        setAppIsReady(true); // 오류 발생해도 앱 실행 계속
       }
     }
 
