@@ -4,11 +4,12 @@ import { NavigationContainer, NavigationContainerRef } from '@react-navigation/n
 import { createStackNavigator } from '@react-navigation/stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { Ionicons } from '@expo/vector-icons';
-import { RootStackParamList, RootTabParamList, AuthStackParamList } from './navigation/types';
+import { MainStackParamList, RootTabParamList, AuthStackParamList, SettingsStackParamList } from './navigation/types';
 import { useUserStore } from './store/useUserStore';
 import HomeScreen from './screens/HomeScreen';
 import SkillDetailScreen from './screens/SkillDetailScreen';
 import SettingsScreen from './screens/SettingsScreen';
+import WebViewScreen from './screens/WebViewScreen';
 import LoginScreen from './screens/LoginScreen';
 import { Toast } from 'react-native-toast-message/lib/src/Toast';
 import * as SplashScreen from 'expo-splash-screen';
@@ -22,9 +23,10 @@ SplashScreen.preventAutoHideAsync();
 
 // Stack 및 Tab 네비게이터 생성
 // 각 네비게이터 스택을 생성하고 타입 지정
-const Stack = createStackNavigator<RootStackParamList>();
+const Stack = createStackNavigator<MainStackParamList>();
 const Tab = createBottomTabNavigator<RootTabParamList>();
 const AuthStack = createStackNavigator<AuthStackParamList>();
+const SettingsStack = createStackNavigator<SettingsStackParamList>();
 
 // 중첩될 스택 네이게이터 정의
 // '홈' 탭의 내용물 (Home -> SkillDetail)
@@ -54,6 +56,30 @@ function HomeStack() {
   );
 }
 
+// '설정' 탭의 내용물이 될 스택 네비게이터 컴포넌트
+function SettingsStackNavigator() {
+  return (
+    <SettingsStack.Navigator
+      screenOptions={{
+        headerStyle: { backgroundColor: '#667eea' },
+        headerTintColor: '#fff',
+        headerTitleStyle: { fontWeight: 'bold' },
+      }}
+    >
+      <SettingsStack.Screen
+        name="SettingsMain" // navigation/types.ts의 SettingsStackParamList와 일치
+        component={SettingsScreen}
+        options={{ title: '설정' }}
+      />
+      <SettingsStack.Screen
+        name="WebView"
+        component={WebViewScreen}
+        options={{ title: '웹뷰' }}
+      />
+    </SettingsStack.Navigator>
+  )
+}
+
 function HomeTabNavigator() {
   return (
     <Tab.Navigator
@@ -66,7 +92,7 @@ function HomeTabNavigator() {
           if (route.name === 'HomeStack') {
             // focused 상태에 따라 다른 아이콘 사용
             iconName = focused ? 'home' : 'home-outline';
-          } else if (route.name === 'Settings') {
+          } else if (route.name === 'SettingsStack') {
             iconName = focused ? 'settings' : 'settings-outline';
           } else {
             iconName = 'help-outline'; // 기본 아이콘
@@ -90,12 +116,11 @@ function HomeTabNavigator() {
       />
       {/* '설정' 탭에 SettingsScreen 연결 */}
       <Tab.Screen
-        name="Settings"
-        component={SettingsScreen}
+        name="SettingsStack"
+        component={SettingsStackNavigator}
         options={{
           title: '설정',
-          headerStyle: { backgroundColor: '#667eea' },
-          headerTintColor: '#fff'
+          headerShown: false
         }}
       />
     </Tab.Navigator>
@@ -226,8 +251,8 @@ export default function App() {
       // 알림에 숨겨진 data를 꺼냄
       const data = response.notification.request.content.data;
 
-      if (data && data.skillId && data.skillTitle && 
-          typeof data.skillId === 'string' && typeof data.skillTitle === 'string') {
+      if (data && data.skillId && data.skillTitle &&
+        typeof data.skillId === 'string' && typeof data.skillTitle === 'string') {
         // 앱이 완전히 로드 된 후에만 (navigationRef.isReady()) 네비게이션 수행
         if (navigationRef.current) {
           // SkillDetail 화면으로 네비게이션

@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, Button, ActivityIndicator } from 'react-native';
 import { RouteProp } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
-import { RootStackParamList } from '../navigation/types';
+import { MainStackParamList } from '../navigation/types';
 import { SkillDetailScreenProps, SkillDetail } from '../navigation/types';
 import apiService from '../api/apiService';
 
@@ -10,8 +10,8 @@ import apiService from '../api/apiService';
 // React Navigation이 자동으로 전달하는 props:
 // - route: 화면 정보와 파라미터
 // - navigation: 화면 이동 메서드들
-type SkillDetailScreenNavigationProp = StackNavigationProp<RootStackParamList, 'SkillDetail'>;
-type SkillDetailScreenRouteProp = RouteProp<RootStackParamList, 'SkillDetail'>;
+type SkillDetailScreenNavigationProp = StackNavigationProp<MainStackParamList, 'SkillDetail'>;
+type SkillDetailScreenRouteProp = RouteProp<MainStackParamList, 'SkillDetail'>;
 
 export default function SkillDetailScreen({ route, navigation }: SkillDetailScreenProps) {
     const { skill: baseSkill } = route.params; // route.params에서 skill 객체 추출

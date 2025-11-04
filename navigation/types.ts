@@ -15,18 +15,24 @@ export type SkillDetail = Skill & {
 
 // --- 네비게이터 파라미터 리스트 정의 ---
 // Stack Navigator (Home -> SkillDetail)
-export type RootStackParamList = {
+export type MainStackParamList = {
     Home: undefined;
     // SkillDetail 스크린은 기본 Skill 객체를 파라미터로 받음
     // ID를 사용해 상세 정보는 스크린 내부에서 fetch
     SkillDetail: { skill: Skill };
 };
 
+// Settings Stack (SettingsMain -> WebView)
+export type SettingsStackParamList = {
+    SettingsMain: undefined;
+    WebView: undefined;
+}
+
 // Tab Navigator (HomeStack | Settings)
 export type RootTabParamList = {
     // 'HomeStack' 탭은 RootStackParamList 전체를 중첩합니다.
-    HomeStack: NavigatorScreenParams<RootStackParamList>;
-    Settings: undefined;
+    HomeStack: NavigatorScreenParams<MainStackParamList>;
+    SettingsStack: NavigatorScreenParams<SettingsStackParamList>;
 };
 
 // Auth Stack (Login)
@@ -46,11 +52,12 @@ export type AuthStackParamList = {
 // ChildComponent(name = "홍길동", age = 25)
 
 // 각 스크린이 받을 Props 타입을 미리 정의 
-export type HomeScreenProps = StackScreenProps<RootStackParamList, 'Home'>;
-export type SkillDetailScreenProps = StackScreenProps<RootStackParamList, 'SkillDetail'>;
+export type HomeScreenProps = StackScreenProps<MainStackParamList, 'Home'>;
+export type SkillDetailScreenProps = StackScreenProps<MainStackParamList, 'SkillDetail'>;
 
 // RootTabParamList 내부 스크린들의 Props
-export type SettingsScreenProps = BottomTabScreenProps<RootTabParamList, 'Settings'>;
+export type SettingsScreenProps = StackScreenProps<SettingsStackParamList, 'SettingsMain'>;
+export type WebViewScreenProps = StackScreenProps<SettingsStackParamList, 'WebView'>;
 
 // AuthStack 스크린 Props (LoginScreen은 navigation prop을 직접 쓰진 않지만 정의해둠)
 export type LoginScreenProps = StackScreenProps<AuthStackParamList, 'Login'>;

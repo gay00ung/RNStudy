@@ -51,6 +51,11 @@ export default function SettingsScreen({ navigation }: SettingsScreenProps) {
         }
     }
 
+    // 웹뷰 화면으로 이동하는 함수
+    const goToWebView = () => {
+        navigation.navigate('WebView');
+    };
+
     return (
         <SafeAreaView style={styles.container}>
             <View style={styles.content}>
@@ -63,6 +68,15 @@ export default function SettingsScreen({ navigation }: SettingsScreenProps) {
                     placeholder="이름을 입력하세요"
                 />
 
+                {/* 웹뷰 버튼 */}
+                <View style={styles.buttonContainer}>
+                    <Button
+                        title="웹뷰 보기 (WebView)"
+                        color="#3b82f6"
+                        onPress={goToWebView}
+                    />
+                </View>
+
                 {/* 로그아웃 버튼 */}
                 <View style={styles.loginSection}>
                     <View style={styles.divider} />
@@ -74,7 +88,7 @@ export default function SettingsScreen({ navigation }: SettingsScreenProps) {
                 </View>
 
                 {/* 네이티브 토스트 메시지 버튼 */}
-                <View style={styles.logoutButtonContainer}>
+                <View style={styles.buttonContainer}>
                     <Button
                         title="네이티브 토스트 띄우기 (Android)"
                         color="#007aff"
@@ -124,7 +138,7 @@ const styles = StyleSheet.create({
         backgroundColor: '#cbd5e1',
         marginBottom: 20,
     },
-    logoutButtonContainer: {
+    buttonContainer: {
         marginTop: 16,
-    },
+    }
 });

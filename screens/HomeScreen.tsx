@@ -3,12 +3,12 @@ import { StyleSheet, Text, View, FlatList, TouchableOpacity, Alert, ActivityIndi
 import { SafeAreaView } from 'react-native-safe-area-context';
 import ProfileCard from '../components/ProfileCard';
 import { StackNavigationProp } from '@react-navigation/stack';
-import { RootStackParamList, Skill } from '../navigation/types';
+import { MainStackParamList, Skill } from '../navigation/types';
 import { useUserStore } from '../store/useUserStore';
 import apiService from '../api/apiService';
 import Animated, { FadeIn, SlideInDown } from 'react-native-reanimated';
 
-type HomeScreenNavigationProp = StackNavigationProp<RootStackParamList, 'Home'>;
+type HomeScreenNavigationProp = StackNavigationProp<MainStackParamList, 'Home'>;
 
 type Props = {
     navigation: HomeScreenNavigationProp;
