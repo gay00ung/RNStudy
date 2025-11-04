@@ -1,20 +1,19 @@
 import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, Button, ActivityIndicator } from 'react-native';
-import { RouteProp } from '@react-navigation/native';
-import { StackNavigationProp } from '@react-navigation/stack';
-import { MainStackParamList } from '../navigation/types';
-import { SkillDetailScreenProps, SkillDetail } from '../navigation/types';
+import { SkillDetailScreenProps, SkillDetail, Skill } from '../navigation/types';
 import apiService from '../api/apiService';
 
-// SkillDetailScreen이 받게 될 route와 navigation prop의 타입 정의
-// React Navigation이 자동으로 전달하는 props:
-// - route: 화면 정보와 파라미터
-// - navigation: 화면 이동 메서드들
-type SkillDetailScreenNavigationProp = StackNavigationProp<MainStackParamList, 'SkillDetail'>;
-type SkillDetailScreenRouteProp = RouteProp<MainStackParamList, 'SkillDetail'>;
-
 export default function SkillDetailScreen({ route, navigation }: SkillDetailScreenProps) {
-    const { skill: baseSkill } = route.params; // route.params에서 skill 객체 추출
+    const params = route.params;
+
+    // 딥 링크 등에서 skillId만 넘어올 수 있으므로 안전하게 기본 스킬 정보 구성
+    const initialSkill: Skill = 'skill' in params
+        ? params.skill
+        : {
+            id: params.skillId,
+            title: params.skillTitle ?? '스킬 상세',
+        };
+    const skillId = initialSkill.id;
 
     // 상세 데이터, 로딩, 에러를 위한 상태 (ViewModel의 StateFlow 역할)
     const [detailData, setDetailData] = useState<SkillDetail | null>(null);
@@ -29,7 +28,7 @@ export default function SkillDetailScreen({ route, navigation }: SkillDetailScre
             setError(null);
             try {
                 // apiService에서 상세 정보 fetch
-                const data = await apiService.fetchSkillDetail(baseSkill.id);
+                const data = await apiService.fetchSkillDetail(skillId);
                 setDetailData(data);
             } catch (e) {
                 setError('상세 정보를 불러오는 데 실패했습니다.');
@@ -38,7 +37,7 @@ export default function SkillDetailScreen({ route, navigation }: SkillDetailScre
             }
         }
         loadDetailData();
-    }, [baseSkill.id]); // baseSkill.id가 변경될 때마다 재실행
+    }, [skillId]); // 요청 ID가 변경될 때마다 재실행
 
     // 로딩 중 UI
     if (loading) {
@@ -66,7 +65,7 @@ export default function SkillDetailScreen({ route, navigation }: SkillDetailScre
             {/* detailData가 로드되기 전(null)에는 기본 title을,
                 로드된 후에는 API에서 받은 title (detailData.title)을 보여줌
             */}
-            <Text style={styles.title}>{detailData?.title || baseSkill.title}</Text>
+            <Text style={styles.title}>{detailData?.title || initialSkill.title}</Text>
 
             {detailData && ( // detailData가 null이 아닐 때만 렌더링
                 <>

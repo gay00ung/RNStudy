@@ -15,11 +15,13 @@ export type SkillDetail = Skill & {
 
 // --- 네비게이터 파라미터 리스트 정의 ---
 // Stack Navigator (Home -> SkillDetail)
+export type SkillDetailParams =
+    | { skill: Skill }
+    | { skillId: string; skillTitle?: string };
+
 export type MainStackParamList = {
     Home: undefined;
-    // SkillDetail 스크린은 기본 Skill 객체를 파라미터로 받음
-    // ID를 사용해 상세 정보는 스크린 내부에서 fetch
-    SkillDetail: { skill: Skill };
+    SkillDetail: SkillDetailParams;
 };
 
 // Settings Stack (SettingsMain -> WebView)

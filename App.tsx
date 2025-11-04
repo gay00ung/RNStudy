@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { StatusBar } from 'expo-status-bar';
-import { NavigationContainer, NavigationContainerRef } from '@react-navigation/native';
+import { NavigationContainer, NavigationContainerRef, LinkingOptions } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { Ionicons } from '@expo/vector-icons';
@@ -15,7 +15,7 @@ import { Toast } from 'react-native-toast-message/lib/src/Toast';
 import * as SplashScreen from 'expo-splash-screen';
 import * as Notifications from 'expo-notifications';
 import * as Device from 'expo-device';
-import { Platform } from 'react-native';
+import { Platform, Linking, ActivityIndicator } from 'react-native';
 
 // Zustand가 로드 되었는지 추적하는 상태
 // SplashScreen이 자동으로 사라지지 않도록 설정
@@ -202,6 +202,33 @@ async function registerForPushNotificationsAsync() {
   return token;
 }
 
+// 딥 링킹 설정 정의
+// (Kotlin 매핑: NavDeepLink { uriPattern = "..." } )
+const linking: LinkingOptions<RootTabParamList> = {
+  prefixes: ['myrnapp://'],
+  config: {
+    screens: {
+      HomeStack: {
+        screens: {
+          Home: 'home',
+          SkillDetail: {
+            path: 'skills/:skillId',
+            parse: {
+              skillId: (value: string) => value,
+            },
+          },
+        },
+      },
+      SettingsStack: {
+        screens: {
+          SettingsMain: 'settings',
+          WebView: 'webview',
+        },
+      },
+    },
+  },
+};
+
 // 메인 앱 컴포넌트 (라우터)
 export default function App() {
   // Zustand 로딩 완료 상태인지 추적하는 로컬 상태
@@ -295,8 +322,12 @@ export default function App() {
 
   // 앱이 준비 되었으면 네비게이터 렌더링
   return (
-    // NavigationContainer에 ref를 연결
-    <NavigationContainer ref={navigationRef}>
+    // NavigationContainer에 ref를 연결 + linking prop과 fallback을 추가
+    <NavigationContainer
+      ref={navigationRef}
+      linking={linking}
+      fallback={<ActivityIndicator size="large" color="blue" />} // 딥 링크가 로드되는 동안 보여줄 로딩 스피너
+    >
       <StatusBar style={authToken ? 'light' : 'dark'} />
       {/* 인증 토큰이 있으면 홈 탭 네비게이터, 없으면 인증 네비게이터 표시 */}
       {authToken ? <HomeTabNavigator /> : <AuthNavigator />}
